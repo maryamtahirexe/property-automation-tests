@@ -49,9 +49,14 @@ pipeline {
                         docker run -d --name ${APP_CONTAINER_NAME} -p ${APP_PORT}:${APP_PORT} ${APP_IMAGE}
 
                         echo "⏳ Waiting for app to be accessible on port ${APP_PORT}..."
-                        for i in {1..20}; do
-                            curl -s http://localhost:${APP_PORT} > /dev/null && break
-                            echo "Waiting... ($i)"
+                        i=0
+                        until curl -s http://localhost:${APP_PORT} > /dev/null; do
+                            i=\$((i+1))
+                            echo "Waiting... (\$i)"
+                            if [ \$i -ge 20 ]; then
+                                echo "❌ Timeout: App did not become ready in time."
+                                exit 1
+                            fi
                             sleep 2
                         done
                     """
