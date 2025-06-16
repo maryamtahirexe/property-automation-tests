@@ -42,15 +42,18 @@ pipeline {
             steps {
                 script {
                     sh """
-                        # Stop and remove old container
+                        echo "🛑 Stopping old container (if exists)..."
                         docker rm -f ${APP_CONTAINER_NAME} || true
 
-                        # Run new container
+                        echo "🚀 Starting new container..."
                         docker run -d --name ${APP_CONTAINER_NAME} -p ${APP_PORT}:${APP_PORT} ${APP_IMAGE}
 
-                        # Wait for app to be fully up
-                        echo "⏳ Waiting for app to start on port ${APP_PORT}..."
-                        sleep 20
+                        echo "⏳ Waiting for app to be accessible on port ${APP_PORT}..."
+                        for i in {1..20}; do
+                            curl -s http://localhost:${APP_PORT} > /dev/null && break
+                            echo "Waiting... ($i)"
+                            sleep 2
+                        done
                     """
                 }
             }
@@ -70,7 +73,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        echo "🚀 Running tests against application running at http://localhost:${APP_PORT}"
+                        echo "🧪 Running Selenium tests against http://localhost:${APP_PORT}..."
                         docker run --rm --network host ${TEST_IMAGE}
                     """
                 }
@@ -79,6 +82,10 @@ pipeline {
     }
 
     post {
+        always {
+            echo '🧹 Cleaning up...'
+            sh "docker rm -f ${APP_CONTAINER_NAME} || true"
+        }
         success {
             echo '✅ Pipeline completed successfully!'
         }

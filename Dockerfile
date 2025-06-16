@@ -19,4 +19,6 @@ COPY . /app
 WORKDIR /app
 
 # Default command
-CMD ["pytest", "--maxfail=1", "--disable-warnings", "-v"]
+CMD ["pytest", "-v", "test_suite.py"]
+
+
