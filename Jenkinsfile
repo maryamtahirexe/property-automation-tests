@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         APP_NAME = 'property-app'
-        APP_PORT = '3000'
+        APP_PORT = '3002'
         CONTAINER_NAME = 'property_container'
         TEST_IMAGE = 'property-test-image'
         DISPLAY = ':99'
