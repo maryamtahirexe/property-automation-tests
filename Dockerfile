@@ -1,28 +1,28 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y wget unzip curl gnupg && \
-    apt-get install -y xvfb && \
-    apt-get install -y libnss3 libgconf-2-4 libxi6 libxcursor1 libxcomposite1 libasound2 libxdamage1 libxrandr2 libgl1-mesa-glx libgtk-3-0
-
-# Install Chrome
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google.gpg && \
-    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable
-
-# Set display port to avoid crash
+ENV DEBIAN_FRONTEND=noninteractive
 ENV DISPLAY=:99
 
-# Set work directory
-WORKDIR /tests
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    xvfb \
+    curl \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy files
+# Set environment variables for Chrome
+ENV CHROME_BIN=/usr/bin/chromium
+ENV PATH="${CHROME_BIN}:${PATH}"
+
+# Copy test files
+WORKDIR /tests
 COPY . .
 
-# Install Python packages
-RUN pip install -r requirements.txt
+# Install Python deps
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Entry point
-CMD ["bash", "run_tests.sh"]
+# Default command to run tests
+CMD ["xvfb-run", "--server-args='-screen 0 1024x768x24'", "pytest", "-v", "test_suite.py"]

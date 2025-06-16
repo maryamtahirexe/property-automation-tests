@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import chromedriver_autoinstaller
-
+import pytest
 chromedriver_autoinstaller.install()
 
 
@@ -124,3 +124,4 @@ class AddPropertyTests(BaseTest):
 if __name__ == "__main__":
     print("🔍 Running Combined Selenium Test Suite...\n")
     unittest.main()
+    pytest.main(["-v", "test_suite.py"])
