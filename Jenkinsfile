@@ -45,7 +45,7 @@ pipeline {
                         docker rm -f ${APP_CONTAINER_NAME} || true
 
                         echo "🚀 Starting new container..."
-                        docker run -d --name ${APP_CONTAINER_NAME} -p ${APP_PORT}:3001 ${APP_IMAGE}
+                        docker run -d --name ${APP_CONTAINER_NAME} -p ${APP_PORT}:3000 ${APP_IMAGE}
 
                         echo "⏳ Waiting for app to be accessible on port ${APP_PORT}..."
                         for i in {1..20}; do
