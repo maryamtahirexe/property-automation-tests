@@ -32,7 +32,7 @@ pipeline {
             steps {
                 dir('app') {
                     script {
-                        sh "docker build -t ${APP_IMAGE} ."
+                        sh "docker build -t ${APP_IMAGE} ./my-app"
                     }
                 }
             }
