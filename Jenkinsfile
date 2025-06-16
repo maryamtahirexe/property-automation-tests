@@ -56,14 +56,14 @@ pipeline {
                         fi
 
                         # Free port 3000 if used
-                        USED_CONTAINER=$(docker ps --filter "publish=3000" -q)
+                        USED_CONTAINER=$(docker ps --filter "publish=3001" -q)
                         if [ ! -z "$USED_CONTAINER" ]; then
                             docker stop $USED_CONTAINER || true
                             docker rm $USED_CONTAINER || true
                         fi
 
                         # Start application container
-                        docker run -d --name property-app-container -p 3000:3000 ${APP_IMAGE}
+                        docker run -d --name property-app-container -p 3001:3001 ${APP_IMAGE}
 
                         echo "⏳ Waiting for app to start..."
                         sleep 10
