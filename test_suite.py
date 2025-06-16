@@ -24,7 +24,7 @@ class BaseTest(unittest.TestCase):
 class SignInTests(BaseTest):
     def setUp(self):
         super().setUp()
-        self.driver.get("http://localhost:3001")
+        self.driver.get("http://localhost:3002")
 
     def run_test_case(self, email, password, expected_message_parts):
         try:
@@ -64,7 +64,7 @@ class SignInTests(BaseTest):
 class AddPropertyTests(BaseTest):
     def setUp(self):
         super().setUp()
-        self.driver.get("http://localhost:3001/dashboard/add-property")
+        self.driver.get("http://localhost:3002/dashboard/add-property")
 
     def fill_form(self, property_type="apartment", name="Test Property", location="Test Location", tenant="Test Tenant"):
         select = self.wait.until(EC.presence_of_element_located((By.ID, "propertyType")))
