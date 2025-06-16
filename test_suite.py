@@ -29,7 +29,7 @@ class BaseTest(unittest.TestCase):
 class SignInTests(BaseTest):
     def setUp(self):
         super().setUp()
-        self.driver.get("http://54.159.57.46:3000")
+        self.driver.get("http://localhost:3001")
 
     def run_test_case(self, email, password, expected_message_part):
         try:
@@ -64,7 +64,7 @@ class SignInTests(BaseTest):
 class AddPropertyTests(BaseTest):
     def setUp(self):
         super().setUp()
-        self.driver.get("http://54.159.57.46:3000/dashboard/add-property")
+        self.driver.get("http://localhost:3001/dashboard/add-property")
 
     def fill_form(self, property_type="apartment", name="Test Property", location="Test Location", tenant="Test Tenant"):
         select = self.wait.until(EC.presence_of_element_located((By.ID, "propertyType")))
@@ -123,5 +123,4 @@ class AddPropertyTests(BaseTest):
 
 if __name__ == "__main__":
     print("🔍 Running Combined Selenium Test Suite...\n")
-    unittest.main()
     pytest.main(["-v", "test_suite.py"])

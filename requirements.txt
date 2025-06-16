@@ -1,3 +1,4 @@
 selenium
 chromedriver-autoinstaller
-unittest2
+pytest
+

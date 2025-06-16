@@ -2,84 +2,88 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = 'property-app'
-        APP_PORT = '3001'
-        CONTAINER_NAME = 'property_container'
+        APP_REPO = 'https://github.com/maryamtahirexe/assignmentpart2.git'
+        TEST_REPO = 'https://github.com/maryamtahirexe/property-automation-tests.git'
+        APP_IMAGE = 'property-app-image'
         TEST_IMAGE = 'property-test-image'
-        DISPLAY = ':99'
+        APP_CONTAINER_NAME = 'property-app-container'
+        APP_PORT = '3001'
     }
 
     stages {
-        stage('Clone Repositories') {
+
+        stage('Checkout Application Code') {
             steps {
                 dir('app') {
-                    git branch: 'main', url: 'https://github.com/maryamtahirexe/assignmentpart2.git'
-                }
-                dir('tests') {
-                    git branch: 'main', url: 'https://github.com/maryamtahirexe/property-automation-tests.git'
+                    git branch: 'main', url: "${APP_REPO}"
                 }
             }
         }
 
-        stage('Build and Run App Container') {
+        stage('Checkout Test Code') {
             steps {
-                dir('app') {
-                    sh '''
-                        echo "🔨 Building app container..."
-                        docker build -t $APP_NAME .
-
-                        echo "🧼 Removing existing app container..."
-                        docker rm -f $CONTAINER_NAME || true
-
-                        echo "🚀 Starting app container..."
-                        docker run -d --name $CONTAINER_NAME -p $APP_PORT:$APP_PORT $APP_NAME
-
-                        echo "⏳ Waiting for app to start..."
-                        for i in {1..15}; do
-                            if curl -s http://localhost:$APP_PORT > /dev/null; then
-                                echo "✅ App is up!"
-                                break
-                            fi
-                            echo "Attempt $i: App not ready yet, retrying..."
-                            sleep 5
-                        done
-
-                        echo "🔍 Verifying app is accessible..."
-                        curl -s http://localhost:$APP_PORT || (echo '❌ App not responding!' && exit 1)
-                    '''
+                dir('tests') {
+                    git branch: 'main', url: "${TEST_REPO}"
                 }
             }
         }
 
-        stage('Build Test Image and Run Tests') {
+        stage('Build Application Image') {
+            steps {
+                dir('app') {
+                    script {
+                        sh "docker build -t ${APP_IMAGE} ."
+                    }
+                }
+            }
+        }
+
+        stage('Run Application Container') {
+            steps {
+                script {
+                    sh """
+                        # Stop and remove old container
+                        docker rm -f ${APP_CONTAINER_NAME} || true
+
+                        # Run new container
+                        docker run -d --name ${APP_CONTAINER_NAME} -p ${APP_PORT}:${APP_PORT} ${APP_IMAGE}
+
+                        # Wait for app to be fully up
+                        echo "⏳ Waiting for app to start on port ${APP_PORT}..."
+                        sleep 20
+                    """
+                }
+            }
+        }
+
+        stage('Build Test Docker Image') {
             steps {
                 dir('tests') {
-                    sh '''
-                        echo "🐳 Building test image..."
-                        docker build -t $TEST_IMAGE .
+                    script {
+                        sh "docker build -t ${TEST_IMAGE} ."
+                    }
+                }
+            }
+        }
 
-                        echo "🧪 Running Selenium tests in Docker..."
-                        docker run --rm --network host $TEST_IMAGE
-                    '''
+        stage('Run Selenium Tests') {
+            steps {
+                script {
+                    sh """
+                        echo "🚀 Running tests against application running at http://localhost:${APP_PORT}"
+                        docker run --rm --network host ${TEST_IMAGE}
+                    """
                 }
             }
         }
     }
 
     post {
-        always {
-            echo '🧹 Cleaning up exited containers...'
-            sh 'docker ps -a --filter "status=exited" -q | xargs -r docker rm'
-        }
-
         success {
-            echo '✅ All stages passed. Pipeline completed successfully.'
+            echo '✅ Pipeline completed successfully!'
         }
-
         failure {
-            echo '❌ Pipeline failed. Dumping logs for debugging.'
-            sh "docker logs $CONTAINER_NAME || true"
+            echo '❌ Pipeline failed.'
         }
     }
 }
-

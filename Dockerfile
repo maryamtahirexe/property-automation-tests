@@ -1,28 +1,22 @@
-FROM python:3.12-slim
+FROM python:3.9-slim
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV DISPLAY=:99
-
-# Install dependencies
+# Install required dependencies
 RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-driver \
-    xvfb \
-    curl \
-    unzip \
+    wget gnupg unzip curl chromium chromium-driver \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables for Chrome
+# Set path for Chrome and Chromedriver
 ENV CHROME_BIN=/usr/bin/chromium
-ENV PATH="${CHROME_BIN}:${PATH}"
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
-# Copy test files
-WORKDIR /tests
-COPY . .
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Install Python deps
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy test code
+COPY . /app
+WORKDIR /app
 
-# Default command to run tests
-CMD ["xvfb-run", "--server-args='-screen 0 1024x768x24'", "pytest", "-v", "test_suite.py"]
+# Default command
+CMD ["pytest", "--maxfail=1", "--disable-warnings", "-v"]
