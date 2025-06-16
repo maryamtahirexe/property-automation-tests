@@ -13,7 +13,7 @@ pipeline {
         stage('Clone Repositories') {
             steps {
                 dir('app') {
-                    git branch: 'main', url: 'https://github.com/maryamtahirexe/devopsassign2.git'
+                    git branch: 'main', url: 'https://github.com/maryamtahirexe/assignmentpart2.git'
                 }
                 dir('tests') {
                     git branch: 'main', url: 'https://github.com/maryamtahirexe/property-automation-tests.git'
