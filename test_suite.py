@@ -42,7 +42,7 @@ class SignInTests(BaseTest):
 
             print(f"✅ PASSED: Login with '{email}' => one of {expected_message_parts}")
         except Exception as e:
-            print(f"❌ ERROR: Login test failed for '{email}' | Expected one of: {expected_message_parts}\n{e}")
+            print(f"❌ ERROR: login test failed for '{email}' | Expected one of: {expected_message_parts}\n{e}")
             raise
 
     def test_valid_login(self):
